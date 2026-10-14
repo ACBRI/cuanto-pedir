@@ -340,6 +340,14 @@
       texto = texto.slice(sep[0].length);
     }
     if (!delimitador) delimitador = detectarDelimitador(texto);
+    // Sin comillas, cada línea es una fila y cada separador corta un campo.
+    if (!texto.includes('"')) {
+      const rapidas = [];
+      for (const linea of texto.split(/\r\n|\n|\r/)) {
+        if (linea.trim() !== '') rapidas.push(linea.split(delimitador));
+      }
+      return { filas: rapidas.filter((f) => f.some((x) => x.trim() !== '')), delimitador };
+    }
     const filas = [];
     let fila = [];
     let campo = '';
@@ -673,16 +681,29 @@
     const existenciasArchivo = new Map();
     const cuenta = { filas: 0, usadas: 0, sinFecha: 0, sinProducto: 0, sinCantidad: 0, devoluciones: 0, invertidas: false };
 
+    // Un historial repite las mismas fechas y los mismos productos miles de
+    // veces: cada texto distinto se interpreta una sola vez.
+    const fechasLeidas = new Map();
+    const clavesLeidas = new Map();
     for (let k = desde; k < filas.length; k++) {
       const f = filas[k];
       cuenta.filas += 1;
       const textoProducto = f[cp] == null ? '' : String(f[cp]).trim();
       if (!textoProducto) { cuenta.sinProducto += 1; continue; }
-      const dia = leerFecha(f[cf], orden, lecturaFecha);
+      const valorFecha = f[cf];
+      let dia = fechasLeidas.get(valorFecha);
+      if (dia === undefined) {
+        dia = leerFecha(valorFecha, orden, lecturaFecha);
+        fechasLeidas.set(valorFecha, dia);
+      }
       if (!Number.isFinite(dia)) { cuenta.sinFecha += 1; continue; }
       const cantidad = leerNumero(f[cc], decimal);
       if (!Number.isFinite(cantidad)) { cuenta.sinCantidad += 1; continue; }
-      const clave = claveProducto(textoProducto);
+      let clave = clavesLeidas.get(textoProducto);
+      if (clave === undefined) {
+        clave = claveProducto(textoProducto);
+        clavesLeidas.set(textoProducto, clave);
+      }
       let indice = indicePorClave.get(clave);
       if (indice === undefined) {
         const partes = separarCodigo(textoProducto);
@@ -953,6 +974,7 @@
     if (!n) return sumas;
     const enteros = Math.floor(plazo + 1e-9);
     const fraccion = plazo - enteros;
+    if (typeof azar === 'number') return remuestrearConSemilla(serie, enteros, fraccion, sumas, azar);
     for (let i = 0; i < veces; i++) {
       let s = 0;
       for (let j = 0; j < enteros; j++) s += serie[Math.floor(azar() * n)];
@@ -960,6 +982,64 @@
       sumas[i] = s;
     }
     return sumas;
+  }
+
+  /**
+   * Lo mismo que remuestrear con generador(semilla), con el generador escrito
+   * dentro del ciclo: da exactamente los mismos números, unas tres veces más
+   * rápido, que importa en catálogos de miles de productos.
+   */
+  function remuestrearConSemilla(serie, enteros, fraccion, sumas, semilla) {
+    const n = serie.length;
+    let a = semilla >>> 0;
+    const siguiente = () => {
+      a = (a + 0x6d2b79f5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+    for (let i = 0; i < sumas.length; i++) {
+      let s = 0;
+      for (let j = 0; j < enteros; j++) {
+        a = (a + 0x6d2b79f5) >>> 0;
+        let t = a;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        s += serie[Math.floor((((t ^ (t >>> 14)) >>> 0) / 4294967296) * n)];
+      }
+      if (fraccion > 1e-9 && siguiente() < fraccion) s += serie[Math.floor(siguiente() * n)];
+      sumas[i] = s;
+    }
+    return sumas;
+  }
+
+  /**
+   * El percentil alto sin ordenar, contando: sirve cuando las sumas son
+   * cantidades enteras de rango corto, que es lo normal. Da lo mismo que
+   * ordenar y tomar percentilAlto.
+   */
+  function percentilContando(sumas, q) {
+    const n = sumas.length;
+    if (!n) return 0;
+    let minimo = Infinity;
+    let maximo = -Infinity;
+    for (let i = 0; i < n; i++) {
+      const v = sumas[i];
+      if (v !== Math.floor(v)) return percentilAlto(sumas.slice().sort(), q);
+      if (v < minimo) minimo = v;
+      if (v > maximo) maximo = v;
+    }
+    if (maximo - minimo > 200000) return percentilAlto(sumas.slice().sort(), q);
+    const cuentas = new Uint32Array(maximo - minimo + 1);
+    for (let i = 0; i < n; i++) cuentas[sumas[i] - minimo] += 1;
+    const k = Math.min(n - 1, Math.max(0, Math.ceil((n - 1) * q - 1e-9)));
+    let acumulado = 0;
+    for (let v = 0; v < cuentas.length; v++) {
+      acumulado += cuentas[v];
+      if (acumulado > k) return v + minimo;
+    }
+    return maximo;
   }
 
   /** El valor de una lista ordenada que deja la proporción q por debajo, tomando el de arriba si cae entre dos. */
@@ -998,8 +1078,8 @@
 
   /** La cuenta de un producto esporádico: la cifra que cubre el nivel de servicio en las esperas repetidas. */
   function cuentaEsporadica(serie, { plazo, nivel, veces = REMUESTRAS, semilla = SEMILLA, decimales = 0 }) {
-    const sumas = remuestrear(serie, plazo, veces, generador(semilla)).sort();
-    return { punto: redondear(percentilAlto(sumas, nivel), decimales), sumas };
+    const sumas = remuestrear(serie, plazo, veces, semilla >>> 0);
+    return { punto: redondear(percentilContando(sumas, nivel), decimales), sumas };
   }
 
   /** Lo que cuesta guardar una unidad durante un lote: costo x tasa anual x días del lote / 365. */
@@ -1215,7 +1295,7 @@
   function esperasDe(contexto, resultado) {
     const serie = resultado.indiceSerie >= 0 ? contexto.series.series[resultado.indiceSerie] : contexto.vacia;
     const veces = contexto.parametros.veces || REMUESTRAS;
-    return remuestrear(serie, resultado.plazoEfectivo, veces, generador((SEMILLA ^ semillaDe(resultado.clave)) >>> 0)).sort();
+    return remuestrear(serie, resultado.plazoEfectivo, veces, (SEMILLA ^ semillaDe(resultado.clave)) >>> 0).sort();
   }
 
   /** Cuántas de las esperas repetidas no pasan de `punto`. */
@@ -1326,7 +1406,7 @@
     detectarDelimitador, leerCSV,
     detectarColumnas, encontrarEncabezado, completarPorContenido, leerEstructura,
     prepararHistorial, leerPorProducto, unirPorProducto, construirSeries,
-    media, desviacion, inversaNormal, generador, semillaDe, remuestrear, percentilAlto, clasificar,
+    media, desviacion, inversaNormal, generador, semillaDe, remuestrear, percentilAlto, percentilContando, clasificar,
     cuentaRegular, cuentaEsporadica, guardarDuranteUnLote, nivelPorCostos, acotarNivel,
     calcularProducto, decidirPedido, prepararCalculo, calcularIndice, resumir, calcularTodo,
     esperasDe, cobertura, histograma, resultadosCSV

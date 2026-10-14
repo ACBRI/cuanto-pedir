@@ -37,7 +37,7 @@
     existencias: ['producto', 'existencias', 'enCamino', 'nombre'],
     plazos: ['producto', 'plazo', 'nombre']
   };
-  const TANDA = 40;
+  const TANDA_MS = 40;
   const PAGINA = 200;
 
   const estado = {
@@ -694,11 +694,16 @@
     marco.classList.add('recalculando');
     $('resultados').setAttribute('aria-busy', 'true');
     $('calculando').classList.remove('listo');
-    for (let i = 0; i < total; i += TANDA) {
-      const fin = Math.min(total, i + TANDA);
-      for (let k = i; k < fin; k++) resultados[k] = C.calcularIndice(contexto, k);
-      if (total > TANDA) {
-        $('calculando').textContent = 'Calculando: ' + Math.round((fin / total) * 100) + ' %';
+    // Por tandas de unos 40 milisegundos, para que la página siga respondiendo.
+    let k = 0;
+    while (k < total) {
+      const comienzo = performance.now();
+      do {
+        resultados[k] = C.calcularIndice(contexto, k);
+        k += 1;
+      } while (k < total && performance.now() - comienzo < TANDA_MS);
+      if (k < total) {
+        $('calculando').textContent = 'Calculando: ' + Math.round((k / total) * 100) + ' %';
         await pausa();
         if (id !== estado.calculo) return;
       }
@@ -815,7 +820,7 @@
     if (h.cuenta.invertidas) avisos.push(aviso('Todas las cantidades venían en negativo: se tomaron como salidas.'));
     if (h.orden === 'mda') avisos.push(aviso('Las fechas se leyeron como mes, día y año, como en Estados Unidos.'));
     if (!estado.esEjemplo) {
-      const hoy = Math.floor(Date.now() / 86400000);
+      const hoy = hoyLocal();
       if (hoy - s.fin > 45) avisos.push(aviso('Su historial termina el ' + C.fechaCorta(s.fin) + ', hace ' + f(hoy - s.fin) + ' días. Si la venta cambió desde entonces, la cuenta no lo ve.', true));
     }
     for (const tipo of ['existencias', 'plazos']) {

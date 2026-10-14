@@ -126,6 +126,22 @@ describe('producto esporádico', () => {
     assert.equal(C.percentilAlto(Float64Array.from([0, 0, 0, 1]), 0.5), 0);
   });
 
+  test('la vía rápida del remuestreo da exactamente los mismos números', () => {
+    const lenta = C.remuestrear(serie, 7.3, 3000, C.generador(99));
+    const rapida = C.remuestrear(serie, 7.3, 3000, 99);
+    assert.deepEqual(Array.from(rapida), Array.from(lenta));
+    const decimales = Float64Array.from({ length: 60 }, (_, k) => (k % 5 === 0 ? 1.25 : 0));
+    assert.deepEqual(Array.from(C.remuestrear(decimales, 10, 500, 5)), Array.from(C.remuestrear(decimales, 10, 500, C.generador(5))));
+  });
+
+  test('el percentil contando coincide con el de la lista ordenada', () => {
+    const sumas = C.remuestrear(serie, 10, 5000, 7);
+    const ordenadas = sumas.slice().sort();
+    for (const q of [0, 0.5, 0.9, 0.95, 0.975, 0.999, 1]) assert.equal(C.percentilContando(sumas, q), C.percentilAlto(ordenadas, q), `q = ${q}`);
+    const conDecimales = Float64Array.from([2.5, 0.25, 7.75, 1, 3]);
+    assert.equal(C.percentilContando(conDecimales, 0.95), C.percentilAlto(conDecimales.slice().sort(), 0.95));
+  });
+
   test('el remuestreo admite plazos con fracción', () => {
     const unos = new Float64Array(100).fill(1);
     const sumas = C.remuestrear(unos, 7.5, 4000, C.generador(3));
