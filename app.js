@@ -115,6 +115,17 @@
     return f(numero, C.decimalesVenta(numero));
   }
 
+  /** Existencias con sus propios decimales, aunque el historial venga en enteros. */
+  function existenciasTexto(numero) {
+    return f(numero, Math.max(decimales(), C.contarDecimales([numero])));
+  }
+
+  /** El día de hoy en el reloj de la persona, no en el de Greenwich. */
+  function hoyLocal() {
+    const ahora = new Date();
+    return C.diaDeFecha(ahora.getFullYear(), ahora.getMonth() + 1, ahora.getDate());
+  }
+
   function dinero(numero) {
     return 'USD ' + f(numero, 2);
   }
@@ -930,7 +941,7 @@
     r.nombre ? el('span', { clase: 'producto-nombre', texto: r.nombre }) : null);
     const existencias = r.existencias === null
       ? '—'
-      : [cantidad(r.existencias), r.enCamino > 0 ? el('span', { clase: 'en-camino', texto: '+ ' + cantidad(r.enCamino) + ' en camino' }) : null];
+      : [existenciasTexto(r.existencias), r.enCamino > 0 ? el('span', { clase: 'en-camino', texto: '+ ' + existenciasTexto(r.enCamino) + ' en camino' }) : null];
     const fila = el('tr', { clase: 'fila' + (abierta ? ' abierta' : ''), 'data-clave': r.clave },
       el('td', { clase: 'celda-producto' }, boton),
       el('td', { 'data-etiqueta': 'Tipo' }, el('span', { clase: 'tipo', texto: C.TIPOS[r.tipo] })),
@@ -1027,7 +1038,7 @@
     });
     $('descargar-resultados').addEventListener('click', () => {
       const decimal = (1.5).toLocaleString().includes(',') ? ',' : '.';
-      const hoy = C.fechaISO(Math.floor(Date.now() / 86400000));
+      const hoy = C.fechaISO(hoyLocal());
       descargar('cuanto-pedir-' + hoy + '.csv', C.resultadosCSV(filtrados(), { decimal }));
     });
     $('imprimir').addEventListener('click', () => window.print());
@@ -1038,7 +1049,7 @@
   function lecturaDetalle(r, s) {
     if (r.tipo === 'sin_venta') {
       return 'No se vendió en los ' + f(s.diasCalendario) + ' días del historial. No se pide.' +
-        (r.existencias > 0 ? ' Hay ' + cantidad(r.existencias) + ' en bodega: dinero quieto.' : '');
+        (r.existencias > 0 ? ' Hay ' + existenciasTexto(r.existencias) + ' en bodega: dinero quieto.' : '');
     }
     if (r.tipo === 'regular') {
       const trabajo = s.factor < 0.999 ? ' (' + venta(r.ventaDiariaTrabajo) + ' por día de trabajo)' : '';
@@ -1068,8 +1079,8 @@
 
   function decisionDetalle(r) {
     if (r.estado === 'sin_existencias') return 'Con las existencias de hoy se sabe si hay que pedir.';
-    const camino = r.enCamino > 0 ? ' y vienen ' + cantidad(r.enCamino) + ' en camino' : '';
-    const tiene = r.existencias > 0 ? 'Hay ' + cantidad(r.existencias) + camino : 'No hay existencias' + camino;
+    const camino = r.enCamino > 0 ? ' y vienen ' + existenciasTexto(r.enCamino) + ' en camino' : '';
+    const tiene = r.existencias > 0 ? 'Hay ' + existenciasTexto(r.existencias) + camino : 'No hay existencias' + camino;
     let alcanza = '';
     if (r.alcanzaDias !== null && r.posicion > 0) {
       alcanza = r.alcanzaDias < 1 ? ' No alcanza para un día.' : ' Alcanza para unos ' + plural(Math.floor(r.alcanzaDias), 'día', 'días') + '.';
