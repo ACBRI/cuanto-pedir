@@ -168,8 +168,8 @@ producto que se vende todos los días hábiles no se confunde con uno que se ven
 - Todo se calcula en su navegador. La página no tiene servidor, no pide cuentas y no guarda sus archivos.
 - Una regla de seguridad del navegador (la directiva `connect-src 'none'` de su Content-Security-Policy) le
   prohíbe a la página enviar datos a cualquier parte. Lo único que descarga son las tipografías, de Google
-  Fonts, y, si abre un Excel, el lector de Excel, de cdnjs, con una huella de integridad fija: si ese archivo
-  cambiara, el navegador no lo correría.
+  Fonts. El lector de Excel va dentro de la página (en `vendor/sheetjs/`), así que no se baja de ningún otro
+  sitio y funciona sin internet.
 - Lo único que la página recuerda, en su propio navegador, es si usted eligió el modo claro o el oscuro.
 
 ## Limitaciones
@@ -215,7 +215,8 @@ Licencia MIT: puede usarla, copiarla y cambiarla, también en su empresa. Vea [L
 
 Hecho por Andrés Briñez · [andresbrinez.com](https://andresbrinez.com)
 
-- [SheetJS Community Edition](https://sheetjs.com) lee los archivos de Excel (licencia Apache 2.0).
+- [SheetJS Community Edition](https://sheetjs.com) 0.20.3 lee los archivos de Excel; va copiado en
+  `vendor/sheetjs/` con su licencia (Apache 2.0).
 - Tipografías Archivo, Literata e IBM Plex Mono, de Google Fonts (SIL Open Font License).
 
 ---

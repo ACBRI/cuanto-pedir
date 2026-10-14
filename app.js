@@ -13,12 +13,10 @@
   const Ejemplo = window.Ejemplo;
   const NS = 'http://www.w3.org/2000/svg';
 
-  // El lector de Excel se descarga solo cuando hace falta, con versión fija y
-  // huella de integridad: si el archivo de la red cambiara, el navegador no lo corre.
-  const SHEETJS = {
-    src: 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
-    integridad: 'sha512-r22gChDnGvBylk90+2e/ycr3RVrDi8DIOkIGNhJlKfuyQM4tIRAI062MaV8sfjQKYVGjOBaZBOA87z+IhZE9DA=='
-  };
+  // El lector de Excel (SheetJS 0.20.3) va dentro del repositorio, en
+  // vendor/sheetjs, y se carga solo cuando hace falta: la página no baja código de
+  // ningún otro sitio y lee Excel también sin internet.
+  const SHEETJS = { src: 'vendor/sheetjs/xlsx.full.min.js' };
 
   const ETIQUETAS = {
     fecha: 'Fecha',
@@ -268,8 +266,6 @@
       promesaSheetJS = new Promise((resolver, rechazar) => {
         const s = document.createElement('script');
         s.src = SHEETJS.src;
-        s.integrity = SHEETJS.integridad;
-        s.crossOrigin = 'anonymous';
         s.referrerPolicy = 'no-referrer';
         s.onload = () => (window.XLSX ? resolver(window.XLSX) : rechazar(Object.assign(new Error('lector'), { codigo: 'sin-lector' })));
         s.onerror = () => {

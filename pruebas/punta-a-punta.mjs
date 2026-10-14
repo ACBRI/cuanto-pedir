@@ -8,8 +8,8 @@
 //   npm run punta
 //
 // Usa el Chromium que ya tenga Playwright en ~/.cache/ms-playwright; otro se
-// indica con NAVEGADOR=/ruta/al/chrome. Leer Excel necesita internet (el lector
-// se descarga de cdnjs); sin conexión, esa parte se informa como omitida.
+// indica con NAVEGADOR=/ruta/al/chrome. El lector de Excel va en vendor/sheetjs:
+// esa parte no necesita internet.
 
 import { chromium } from 'playwright-core';
 import assert from 'node:assert/strict';
@@ -23,7 +23,7 @@ const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const capturas = path.join(raiz, 'docs', 'capturas');
 const datos = path.join(raiz, 'pruebas', 'datos');
 const salida = path.join(raiz, 'pruebas', 'salida');
-const PERMITIDOS = new Set(['fonts.googleapis.com', 'fonts.gstatic.com', 'cdnjs.cloudflare.com']);
+const PERMITIDOS = new Set(['fonts.googleapis.com', 'fonts.gstatic.com']);
 
 function buscarNavegador() {
   if (process.env.NAVEGADOR) return process.env.NAVEGADOR;
@@ -297,15 +297,7 @@ console.log('\nEscritorio, servida por HTTP');
     await pagina.waitForFunction(() => document.querySelectorAll('#tabla-cuerpo tr.fila').length === 4);
   });
 
-  // Si hay internet, leer Excel tiene que funcionar; solo se omite sin conexión.
-  let hayInternet = true;
-  try {
-    await fetch('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js', { method: 'HEAD', signal: AbortSignal.timeout(8000) });
-  } catch (e) {
-    hayInternet = false;
-  }
   await paso('un Excel con fila de título, dos hojas y fechas de Excel', async () => {
-    if (!hayInternet) return;
     await pagina.setInputFiles('#archivo-historial', path.join(datos, 'ventas.xlsx'));
     const resultado = await Promise.race([
       pagina.waitForFunction(() => document.querySelectorAll('#tabla-cuerpo tr.fila').length === 2 &&
@@ -322,7 +314,6 @@ console.log('\nEscritorio, servida por HTTP');
     const tipos = await textosColumna(pagina, 1);
     assert.deepEqual(tipos.sort(), ['Esporádico', 'Regular']);
   });
-  if (!hayInternet) console.log('         (sin internet: la lectura de Excel quedó sin probar)');
   await contexto.close();
 }
 
@@ -383,7 +374,7 @@ console.log('\nModo oscuro');
 
 // 5. Lo que salió a la red.
 console.log('\nRed');
-await paso('la página no envía nada: solo descarga tipografías y el lector de Excel', async () => {
+await paso('la página no envía nada: de fuera solo baja las tipografías', async () => {
   const externos = red.filter((r) => !r.url.startsWith('file:') && !r.url.startsWith(base) && !r.url.startsWith('blob:') && !r.url.startsWith('data:'));
   for (const r of externos) {
     assert.ok(PERMITIDOS.has(new URL(r.url).hostname), 'pedido a ' + r.url);
