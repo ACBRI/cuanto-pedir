@@ -56,6 +56,7 @@ Tres columnas bastan: fecha, producto (o su código) y cantidad. Así es el arch
 | --- | --- | --- | --- | --- |
 | 06/04/2026 | FAC-001-000004521 | PT-001 | Paracetamol 500 mg, caja x 100 | 10 |
 | 06/04/2026 | FAC-001-000004522 | PT-001 | Paracetamol 500 mg, caja x 100 | 7 |
+| 06/04/2026 | FAC-001-000004523 | PT-001 | Paracetamol 500 mg, caja x 100 | 14 |
 | 06/04/2026 | FAC-001-000004524 | PT-002 | Ibuprofeno 400 mg, caja x 50 | 28 |
 
 - Puede traer una fila por factura o una por día: las filas del mismo producto y del mismo día se suman.
