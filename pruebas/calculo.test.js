@@ -432,11 +432,16 @@ describe('historial', () => {
     assert.equal(resultados.find((r) => r.clave === 'RARO').tipo, 'esporadico');
   });
 
-  test('los últimos días: un producto que solo se vendió antes queda sin venta', () => {
+  test('los últimos días: el periodo empieza en el corte y lo vendido antes no cuenta', () => {
     const texto = 'fecha;producto;cantidad\n01/01/2026;VIEJO;5\n01/04/2026;NUEVO;5\n30/06/2026;NUEVO;4\n';
     const { resultados, contexto } = calcularDesdeTexto(texto, { ultimosDias: 120 });
-    assert.equal(contexto.series.diasCalendario, 91);
+    assert.equal(contexto.series.diasCalendario, 120);
+    assert.equal(contexto.series.fin, C.diaDeFecha(2026, 6, 30));
     assert.equal(resultados.find((r) => r.clave === 'VIEJO').tipo, 'sin_venta');
+    const todo = calcularDesdeTexto(texto, { ultimosDias: 0 });
+    assert.equal(todo.contexto.series.diasCalendario, 181);
+    const corto = calcularDesdeTexto(texto, { ultimosDias: 400 });
+    assert.equal(corto.contexto.series.diasCalendario, 181, 'un corte más largo que el archivo usa todo el archivo');
   });
 
   test('existencias y plazos por producto', () => {

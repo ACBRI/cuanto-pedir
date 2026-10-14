@@ -734,7 +734,7 @@
     const partes = [];
     if (estado.esEjemplo) partes.push(el('strong', { texto: 'Datos de ejemplo de una empresa ficticia. ' }));
     partes.push('Historia del ' + C.fechaCorta(s.inicio) + ' al ' + C.fechaCorta(s.fin) + ': ' + plural(s.diasCalendario, 'día', 'días') +
-      ', ' + plural(h.cuenta.usadas, 'fila', 'filas') + ' y ' + plural(conVenta, 'producto con venta', 'productos con venta') + '.');
+      ', ' + plural(s.filas, 'fila', 'filas') + ' y ' + plural(conVenta, 'producto con venta', 'productos con venta') + '.');
     if (s.cerrados.length) {
       partes.push(' No hubo ventas ' + lista(nombresDias(s.cerrados), 'ni') + ': la cuenta usa los ' + f(s.diasTrabajo) +
         ' días de trabajo y pasa el plazo a días de trabajo.');

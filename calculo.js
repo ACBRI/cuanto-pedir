@@ -805,17 +805,18 @@
   function construirSeries(historial, opciones = {}) {
     const total = historial.dias.length;
     let fin = -Infinity;
-    for (let i = 0; i < total; i++) if (historial.dias[i] > fin) fin = historial.dias[i];
-    let inicio = Infinity;
-    const corte = opciones.ultimosDias > 0 ? fin - opciones.ultimosDias + 1 : -Infinity;
+    let primero = Infinity;
     for (let i = 0; i < total; i++) {
       const d = historial.dias[i];
-      if (d >= corte && d < inicio) inicio = d;
+      if (d > fin) fin = d;
+      if (d < primero) primero = d;
     }
+    // Con «los últimos N días», el periodo empieza en el corte aunque ese día no haya venta.
+    const inicio = opciones.ultimosDias > 0 ? Math.max(primero, fin - opciones.ultimosDias + 1) : primero;
     const cantidadProductos = historial.productos.length;
     if (!Number.isFinite(inicio) || !Number.isFinite(fin)) {
       return {
-        inicio: NaN, fin: NaN, diasCalendario: 0, diasTrabajo: 0, factor: 1, cerrados: [], fechas: [],
+        inicio: NaN, fin: NaN, diasCalendario: 0, diasTrabajo: 0, factor: 1, cerrados: [], fechas: [], filas: 0,
         series: historial.productos.map(() => new Float64Array(0)), ultimaVenta: new Array(cantidadProductos).fill(null)
       };
     }
@@ -849,15 +850,17 @@
     const series = [];
     for (let p = 0; p < cantidadProductos; p++) series.push(new Float64Array(n));
     const ultimaVenta = new Array(cantidadProductos).fill(null);
+    let filas = 0;
     for (let i = 0; i < total; i++) {
       const d = historial.dias[i];
       const c = historial.cants[i];
       if (d < inicio || !(c > 0)) continue;
       const p = historial.prods[i];
       series[p][indice[d - inicio]] += c;
+      filas += 1;
       if (ultimaVenta[p] === null || d > ultimaVenta[p]) ultimaVenta[p] = d;
     }
-    return { inicio, fin, diasCalendario: N, diasTrabajo: n, factor: n / N, cerrados, fechas, series, ultimaVenta };
+    return { inicio, fin, diasCalendario: N, diasTrabajo: n, factor: n / N, cerrados, fechas, series, ultimaVenta, filas };
   }
 
   // --------------------------------------------------------------- la cuenta
