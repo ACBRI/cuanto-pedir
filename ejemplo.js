@@ -129,10 +129,11 @@
       plazos.push([p.codigo, proveedor, dias].join(';'));
     }
 
+    // La marca BOM al inicio hace que Excel lea bien las tildes.
     return {
-      historial: historial.join('\n') + '\n',
-      existencias: existencias.join('\n') + '\n',
-      plazos: plazos.join('\n') + '\n'
+      historial: '﻿' + historial.join('\n') + '\n',
+      existencias: '﻿' + existencias.join('\n') + '\n',
+      plazos: '﻿' + plazos.join('\n') + '\n'
     };
   }
 
