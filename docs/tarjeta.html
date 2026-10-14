@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1200">
+  <title>Cuánto pedir · tarjeta</title>
+  <!-- Fuente de docs/tarjeta.png, la imagen que se ve al compartir el enlace. La escribe herramientas/escribir-tarjeta.mjs. -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;display=swap">
+  <style>
+    :root {
+      --noche: #1C1A2E;
+      --texto: #EFE9DC;
+      --suave: #B9AE9C;
+      --sabana: #D9B25A;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      width: 1200px;
+      height: 630px;
+      overflow: hidden;
+      background: var(--noche);
+      color: var(--texto);
+      font-family: "Literata", Georgia, serif;
+      position: relative;
+    }
+    .marco { padding: 64px 80px 0; }
+    .firma {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-family: "Archivo", system-ui, sans-serif;
+      font-weight: 500;
+      font-size: 24px;
+    }
+    .firma svg { width: 48px; height: 48px; }
+    .ceja {
+      margin: 56px 0 14px;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 18px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--sabana);
+    }
+    h1 {
+      margin: 0 0 18px;
+      font-family: "Archivo", system-ui, sans-serif;
+      font-weight: 600;
+      font-size: 104px;
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+    .entrada {
+      margin: 0;
+      max-width: 860px;
+      font-size: 32px;
+      line-height: 1.35;
+    }
+    .privacidad {
+      margin: 18px 0 0;
+      font-size: 22px;
+      color: var(--suave);
+    }
+    svg.sierra { position: absolute; left: 0; bottom: 0; }
+    .sierra .horizonte { stroke: var(--sabana); stroke-width: 1.5; }
+    .sierra .existencias { fill: none; stroke: var(--texto); stroke-width: 2.5; stroke-linejoin: round; }
+    .sierra .pedido { fill: var(--noche); stroke: var(--sabana); stroke-width: 2; }
+    .sitio {
+      position: absolute;
+      right: 80px;
+      top: 72px;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 20px;
+      color: var(--suave);
+    }
+  </style>
+</head>
+<body>
+  <div class="marco">
+    <div class="firma">
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <g fill="none" stroke="#EFE9DC" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 41 H36"/><path d="M9 58 L36 8"/><path d="M36 8 V58"/>
+          <path d="M36 8 H45 A11 11 0 0 1 45 30 H36"/><path d="M36 30 H47 A14 14 0 0 1 47 58 H36"/>
+        </g>
+        <circle cx="46" cy="19" r="5" fill="#F07A3B"/>
+      </svg>
+      <span>Andrés Briñez</span>
+    </div>
+    <p class="ceja">Herramienta gratuita · Código abierto</p>
+    <h1>Cuánto pedir</h1>
+    <p class="entrada">Qué productos pedir, cuánto y cuándo, a partir de su historial de ventas.</p>
+    <p class="privacidad">Sin instalar nada. Sus datos no salen de su computador.</p>
+  </div>
+  <span class="sitio">andresbrinez.com</span>
+  <svg class="sierra" id="sierra" width="1200" height="120" viewBox="0 0 1200 120" aria-hidden="true"></svg>
+  <script src="../calculo.js"></script>
+  <script>
+    // La misma sierra de la cabecera de la página: existencias que bajan, tocan
+    // el punto de pedido, se pide y el lote llega diez días después.
+    (function () {
+      var NS = 'http://www.w3.org/2000/svg';
+      var lienzo = document.getElementById('sierra');
+      var azar = Calculo.generador(1777);
+      var poisson = function (l) { var t = Math.exp(-l), k = 0, p = 1; do { k++; p *= azar(); } while (p > t); return k - 1; };
+      var dias = 120, punto = 51, lote = 120, plazo = 10, hay = 150, llegadas = [], trazo = [], pedidos = [];
+      for (var d = 0; d < dias; d++) {
+        var llegan = llegadas.filter(function (x) { return x === d; }).length;
+        if (llegan) { trazo.push([d, hay]); hay += lote * llegan; }
+        trazo.push([d, hay]);
+        hay = Math.max(0, hay - poisson(4));
+        var enCamino = llegadas.filter(function (x) { return x > d; }).length;
+        if (hay + lote * enCamino <= punto) { llegadas.push(d + 1 + plazo); pedidos.push(d + 1); }
+      }
+      trazo.push([dias, hay]);
+      var x = function (v) { return v / dias * 1200; };
+      var y = function (v) { return 112 - v / 200 * 100; };
+      var linea = document.createElementNS(NS, 'line');
+      linea.setAttribute('class', 'horizonte');
+      linea.setAttribute('x1', 0); linea.setAttribute('x2', 1200);
+      linea.setAttribute('y1', y(punto)); linea.setAttribute('y2', y(punto));
+      lienzo.appendChild(linea);
+      var camino = document.createElementNS(NS, 'path');
+      camino.setAttribute('class', 'existencias');
+      camino.setAttribute('d', trazo.map(function (p, i) { return (i ? 'L' : 'M') + x(p[0]).toFixed(1) + ' ' + y(p[1]).toFixed(1); }).join(' '));
+      lienzo.appendChild(camino);
+      pedidos.forEach(function (d) {
+        var c = document.createElementNS(NS, 'circle');
+        c.setAttribute('class', 'pedido');
+        c.setAttribute('cx', x(d)); c.setAttribute('cy', y(punto)); c.setAttribute('r', 4.5);
+        lienzo.appendChild(c);
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -13,7 +13,9 @@
   "scripts": {
     "test": "node --test",
     "ejemplo": "node herramientas/escribir-ejemplo.js",
-    "punta": "node pruebas/punta-a-punta.mjs"
+    "punta": "node pruebas/punta-a-punta.mjs",
+    "tarjeta": "node herramientas/escribir-tarjeta.mjs",
+    "datos-de-prueba": "python3 herramientas/escribir-datos-de-prueba.py"
   },
   "devDependencies": {
     "playwright-core": "1.61.1"
