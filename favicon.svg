@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Andrés Briñez">
+  <rect width="64" height="64" rx="8" fill="#1C1A2E"/>
+  <g fill="none" stroke="#EFE9DC" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <!-- el horizonte: la llanura, una sola linea que sigue mas alla de la letra -->
+    <path d="M3 41 H36"/>
+    <!-- A: la diagonal que sube desde el llano -->
+    <path d="M9 58 L36 8"/>
+    <!-- B: tallo compartido con la A y dos panzas -->
+    <path d="M36 8 V58"/>
+    <path d="M36 8 H45 A11 11 0 0 1 45 30 H36"/>
+    <path d="M36 30 H47 A14 14 0 0 1 47 58 H36"/>
+  </g>
+  <!-- el sol, cayendo dentro de la panza alta -->
+  <circle cx="46" cy="19" r="5" fill="#F07A3B"/>
+</svg>

@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' file: https://cdnjs.cloudflare.com; style-src 'self' file: https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' file: data: blob:; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>Cuánto pedir</title>
+  <meta name="description" content="Calculadora gratuita: qué productos pedir, cuánto y cuándo, a partir de su historial de ventas o de consumo. La cuenta se hace en su navegador; sus datos no salen de su computador.">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#1C1A2E">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_EC">
+  <meta property="og:title" content="Cuánto pedir">
+  <meta property="og:description" content="Qué productos pedir, cuánto y cuándo, a partir de su historial de ventas. Gratis, sin instalar nada y sin que sus datos salgan de su computador.">
+  <meta property="og:url" content="https://acbri.github.io/cuanto-pedir/">
+  <meta property="og:image" content="https://acbri.github.io/cuanto-pedir/docs/tarjeta.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&amp;display=swap">
+  <link rel="stylesheet" href="estilos.css">
+  <script src="tema.js"></script>
+</head>
+<body>
+  <a class="saltar" href="#contenido">Ir al contenido</a>
+
+  <header class="cabecera">
+    <div class="contenedor cabecera-barra">
+      <span class="firma">
+        <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+          <g fill="none" stroke="#EFE9DC" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 41 H36"/>
+            <path d="M9 58 L36 8"/>
+            <path d="M36 8 V58"/>
+            <path d="M36 8 H45 A11 11 0 0 1 45 30 H36"/>
+            <path d="M36 30 H47 A14 14 0 0 1 47 58 H36"/>
+          </g>
+          <circle cx="46" cy="19" r="5" fill="#F07A3B"/>
+        </svg>
+        <span>Andrés Briñez</span>
+      </span>
+      <button type="button" class="boton-tema" id="boton-tema" aria-pressed="false">
+        <svg class="icono-luna" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
+        <svg class="icono-sol" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.5 1.5M17.2 17.2l1.5 1.5M5.3 18.7l1.5-1.5M17.2 6.8l1.5-1.5"/></svg>
+        <span>Modo oscuro</span>
+      </button>
+    </div>
+    <div class="contenedor cabecera-cuerpo">
+      <p class="ceja">Herramienta gratuita · Código abierto</p>
+      <h1>Cuánto pedir</h1>
+      <p class="entrada">Qué productos pedir, cuánto y cuándo, a partir de su historial de ventas o de consumo.</p>
+      <p class="privacidad">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="10.5" width="14" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+        <span><strong>Sus datos no salen de este computador.</strong> La cuenta se hace aquí, en su navegador: no hay servidor, ni cuentas, ni registro.</span>
+      </p>
+    </div>
+    <svg class="sierra" id="sierra" aria-hidden="true" focusable="false"></svg>
+  </header>
+
+  <main id="contenido">
+    <noscript>
+      <div class="contenedor"><p class="error">Esta herramienta hace la cuenta en su navegador y necesita JavaScript activado.</p></div>
+    </noscript>
+
+    <section class="paso" id="paso-datos" aria-labelledby="titulo-datos">
+      <div class="contenedor">
+        <div class="paso-titulo"><span class="folio">01 /</span><h2 id="titulo-datos">Su historial</h2></div>
+        <p class="paso-entrada">Un archivo CSV o Excel con una fila por venta o por consumo: la fecha, el producto y la cantidad. Sirve lo que exporta su sistema; las columnas se reconocen solas y aquí puede corregirlas.</p>
+
+        <div class="carga">
+          <div class="ranura" data-ranura="historial">
+            <label class="soltar" for="archivo-historial">
+              <input type="file" id="archivo-historial" class="visualmente-oculto" accept=".csv,.txt,.tsv,.xlsx,.xlsm,.xls,.ods">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" d="M6 2.8h8l4 4v14.4H6z"/><path fill="none" stroke="currentColor" stroke-width="1.6" d="M14 2.8v4h4"/><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M12 17.5v-6.5M9.2 13.6 12 10.8l2.8 2.8"/></svg>
+              <span class="soltar-titulo"><span class="con-puntero">Arrastre aquí su archivo o <span class="enlace">elíjalo</span></span><span class="tactil"><span class="enlace">Elija su archivo</span></span></span>
+              <span class="soltar-nota">CSV o Excel (.xlsx, .xls)</span>
+            </label>
+            <div class="ranura-estado" role="status"></div>
+            <div class="ranura-columnas" hidden></div>
+          </div>
+
+          <div class="carga-ejemplo">
+            <p>¿No tiene un archivo a mano?</p>
+            <button type="button" class="boton" id="usar-ejemplo">Usar datos de ejemplo</button>
+            <p class="nota">Una empresa farmacéutica ficticia: 33 productos y 180 días de venta. Para ver cómo es cada archivo, descárguelo: <button type="button" class="boton-enlace" data-descargar="historial">historial</button>, <button type="button" class="boton-enlace" data-descargar="existencias">existencias</button> y <button type="button" class="boton-enlace" data-descargar="plazos">plazos</button>.</p>
+            <p class="estado-carga" id="estado-carga" role="status"></p>
+          </div>
+        </div>
+
+        <details class="opcionales" id="opcionales">
+          <summary>Opcional: existencias de hoy y plazo de cada proveedor</summary>
+          <div class="opcionales-cuerpo">
+            <div class="ranura ranura-chica" data-ranura="existencias">
+              <h3>Existencias de hoy</h3>
+              <p class="nota">Un archivo con el producto y cuántas unidades hay. Si trae lo que viene en camino, también se cuenta. Con esto se sabe qué pedir hoy.</p>
+              <label class="soltar" for="archivo-existencias">
+                <input type="file" id="archivo-existencias" class="visualmente-oculto" accept=".csv,.txt,.tsv,.xlsx,.xlsm,.xls,.ods">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" d="M6 2.8h8l4 4v14.4H6z"/><path fill="none" stroke="currentColor" stroke-width="1.6" d="M14 2.8v4h4"/><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M12 17.5v-6.5M9.2 13.6 12 10.8l2.8 2.8"/></svg>
+                <span class="soltar-titulo"><span class="con-puntero">Arrastre o <span class="enlace">elija</span> el archivo</span><span class="tactil"><span class="enlace">Elija el archivo</span></span></span>
+              </label>
+              <div class="ranura-estado" role="status"></div>
+              <div class="ranura-columnas" hidden></div>
+            </div>
+            <div class="ranura ranura-chica" data-ranura="plazos">
+              <h3>Plazo de cada proveedor</h3>
+              <p class="nota">Un archivo con el producto y los días que tarda en llegar desde que se pide. Los productos que no estén usan el plazo general.</p>
+              <label class="soltar" for="archivo-plazos">
+                <input type="file" id="archivo-plazos" class="visualmente-oculto" accept=".csv,.txt,.tsv,.xlsx,.xlsm,.xls,.ods">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" d="M6 2.8h8l4 4v14.4H6z"/><path fill="none" stroke="currentColor" stroke-width="1.6" d="M14 2.8v4h4"/><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M12 17.5v-6.5M9.2 13.6 12 10.8l2.8 2.8"/></svg>
+                <span class="soltar-titulo"><span class="con-puntero">Arrastre o <span class="enlace">elija</span> el archivo</span><span class="tactil"><span class="enlace">Elija el archivo</span></span></span>
+              </label>
+              <div class="ranura-estado" role="status"></div>
+              <div class="ranura-columnas" hidden></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section class="paso" id="paso-parametros" aria-labelledby="titulo-parametros">
+      <div class="contenedor">
+        <div class="paso-titulo"><span class="folio">02 /</span><h2 id="titulo-parametros">Cómo quiere cubrirse</h2></div>
+        <p class="paso-entrada">Cada valor trae uno razonable. Cámbielo si su caso es otro: la cuenta se rehace sola.</p>
+
+        <form class="parametros" id="parametros" novalidate>
+          <div class="campo">
+            <label for="p-plazo">Días de plazo de entrega</label>
+            <div class="con-unidad">
+              <input type="text" id="p-plazo" inputmode="decimal" autocomplete="off" value="10" aria-describedby="a-plazo">
+              <span class="unidad">días</span>
+            </div>
+            <p class="ayuda" id="a-plazo">Lo que tarda el proveedor desde que usted pide hasta que la mercadería llega. Si subió plazos por producto, mandan esos.</p>
+          </div>
+
+          <fieldset class="campo campo-nivel">
+            <legend>Nivel de servicio</legend>
+            <div class="selector">
+              <label><input type="radio" name="modo-nivel" value="fijo" checked> Lo fijo yo</label>
+              <label><input type="radio" name="modo-nivel" value="costos"> Lo calculo con margen y costo</label>
+            </div>
+            <div id="modo-fijo">
+              <div class="con-unidad">
+                <input type="text" id="p-nivel" inputmode="decimal" autocomplete="off" value="95" aria-describedby="a-nivel">
+                <span class="unidad">%</span>
+              </div>
+              <p class="ayuda" id="a-nivel">De cada 100 veces que espera un pedido, en cuántas no quiere quedarse sin producto. Más alto, más colchón.</p>
+            </div>
+            <div id="modo-costos" hidden>
+              <div class="trio">
+                <div>
+                  <label for="p-margen">Margen por unidad</label>
+                  <div class="con-unidad">
+                    <span class="unidad antes">USD</span>
+                    <input type="text" id="p-margen" inputmode="decimal" autocomplete="off" value="1,00" aria-describedby="a-margen">
+                  </div>
+                  <p class="ayuda" id="a-margen">Lo que gana al vender una; es lo que pierde si falta.</p>
+                </div>
+                <div>
+                  <label for="p-costo">Costo por unidad</label>
+                  <div class="con-unidad">
+                    <span class="unidad antes">USD</span>
+                    <input type="text" id="p-costo" inputmode="decimal" autocomplete="off" value="2,40" aria-describedby="a-costo">
+                  </div>
+                  <p class="ayuda" id="a-costo">Lo que le cuesta una unidad.</p>
+                </div>
+                <div>
+                  <label for="p-guardar">Guardar un año cuesta</label>
+                  <div class="con-unidad">
+                    <input type="text" id="p-guardar" inputmode="decimal" autocomplete="off" value="25" aria-describedby="a-guardar">
+                    <span class="unidad">% del costo</span>
+                  </div>
+                  <p class="ayuda" id="a-guardar">Bodega, dinero quieto, vencimientos y mermas.</p>
+                </div>
+              </div>
+              <p class="resultado-nivel" id="resultado-nivel" aria-live="polite"></p>
+            </div>
+          </fieldset>
+
+          <div class="campo">
+            <label for="p-lote">Lote: días de venta por pedido</label>
+            <div class="con-unidad">
+              <input type="text" id="p-lote" inputmode="decimal" autocomplete="off" value="30" aria-describedby="a-lote">
+              <span class="unidad">días</span>
+            </div>
+            <p class="ayuda" id="a-lote">Cuánto pedir cada vez. Por defecto, un mes de venta.</p>
+          </div>
+
+          <div class="campo">
+            <label for="p-historia">Historia que se usa</label>
+            <select id="p-historia" aria-describedby="a-historia">
+              <option value="0">Todo el archivo</option>
+              <option value="365">Los últimos 365 días</option>
+              <option value="180">Los últimos 180 días</option>
+              <option value="90">Los últimos 90 días</option>
+            </select>
+            <p class="ayuda" id="a-historia">Si su archivo es largo, los últimos meses se parecen más a la venta de hoy.</p>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section class="paso" id="paso-resultados" aria-labelledby="titulo-resultados">
+      <div class="contenedor">
+        <div class="paso-titulo"><span class="folio">03 /</span><h2 id="titulo-resultados">Qué pedir</h2></div>
+
+        <div class="vacio" id="resultados-vacio">
+          <p>Cuando suba su historial, aquí aparece, producto por producto, cuánto tener y qué pedir hoy.</p>
+          <button type="button" class="boton-secundario" data-accion="ejemplo">Verlo con datos de ejemplo</button>
+        </div>
+
+        <div id="resultados" hidden aria-live="polite">
+          <p class="periodo" id="periodo"></p>
+          <div class="resumen" id="resumen"></div>
+          <p class="tipos" id="tipos"></p>
+          <ul class="avisos" id="avisos"></ul>
+          <p class="honesto">Esto no adivina el futuro: dice cuánto tener sabiendo cuánto puede fallar la cuenta.</p>
+
+          <div class="filtros" role="search">
+            <div>
+              <label for="f-texto">Buscar producto</label>
+              <input type="search" id="f-texto" autocomplete="off" placeholder="Código o nombre">
+            </div>
+            <div>
+              <label for="f-tipo">Tipo</label>
+              <select id="f-tipo">
+                <option value="todos">Todos los tipos</option>
+                <option value="regular">Se venden casi a diario</option>
+                <option value="esporadico">Se venden de vez en cuando</option>
+                <option value="sin_venta">Sin venta</option>
+              </select>
+            </div>
+            <div class="ordenar">
+              <label for="f-orden">Ordenar por</label>
+              <select id="f-orden"></select>
+            </div>
+            <label class="casilla"><input type="checkbox" id="f-pedir"> Solo lo que hay que pedir</label>
+          </div>
+
+          <p class="calculando" id="calculando" aria-live="polite"></p>
+          <div class="tabla-marco" id="tabla-marco">
+            <table class="tabla" id="tabla">
+              <caption class="visualmente-oculto">Resultado por producto. Toque un producto para ver su detalle.</caption>
+              <thead><tr id="tabla-titulos"></tr></thead>
+              <tbody id="tabla-cuerpo"></tbody>
+            </table>
+          </div>
+          <p class="tabla-pie" id="tabla-pie"></p>
+          <div class="acciones-tabla">
+            <button type="button" class="boton" id="descargar-resultados">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg>
+              Descargar esta lista en CSV
+            </button>
+            <button type="button" class="boton-secundario" id="imprimir">Imprimir</button>
+          </div>
+
+          <details class="glosario">
+            <summary>Qué significa cada columna</summary>
+            <dl class="como-glosario">
+              <dt>Tipo</dt>
+              <dd>Se vende casi a diario (regular), de vez en cuando (esporádico) o no se vendió en el periodo (sin venta).</dd>
+              <dt>Venta diaria</dt>
+              <dd>Lo vendido en el periodo dividido entre los días corridos, fines de semana incluidos.</dd>
+              <dt>Colchón</dt>
+              <dd>Lo que se tiene de más para cubrir lo que la venta puede variar mientras llega el pedido.</dd>
+              <dt>Punto de pedido</dt>
+              <dd>Cuando lo que hay, más lo que viene en camino, baja a esta cifra, se pide.</dd>
+              <dt>Existencias</dt>
+              <dd>Lo que hay hoy según su archivo; debajo, lo que viene en camino.</dd>
+              <dt>Pedir ahora</dt>
+              <dd>Si el producto ya llegó a su punto de pedido.</dd>
+              <dt>Cuánto</dt>
+              <dd>Un lote (un mes de venta, o los días que usted elija) más lo que falte para volver al punto de pedido.</dd>
+            </dl>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="paso como" id="como-se-calcula" aria-labelledby="titulo-como">
+      <div class="contenedor">
+        <div class="paso-titulo"><h2 id="titulo-como">Cómo se calcula</h2></div>
+        <p class="paso-entrada">Para cada producto, tres preguntas: cuánto se vende mientras llega el pedido, cuánto puede fallar esa cifra y qué cuesta más, que falte o que sobre.</p>
+
+        <div class="como-rejilla">
+          <div>
+            <h3>Qué tipo de producto es</h3>
+            <p>Si no se vendió en el periodo, no se pide. Si entre un día con venta y el siguiente pasan en promedio más de 1,32 días, se vende de vez en cuando. Si no, se vende casi a diario.</p>
+            <p>Si la empresa no vende ciertos días de la semana, como sábados y domingos, esos días no cuentan como días sin venta.</p>
+          </div>
+          <div>
+            <h3>Los que se venden casi a diario</h3>
+            <p>Se suma la venta de los días que tarda el proveedor y se agrega un colchón. El colchón crece con lo irregular de la venta y con lo que tarda el proveedor.</p>
+            <span class="formula">venta de la espera = venta diaria × días de plazo<br>colchón = z × desviación diaria × √plazo<br>punto de pedido = venta de la espera + colchón</span>
+            <p>La desviación mide cuánto cambia la venta de un día a otro. El factor z sale del nivel de servicio: 1,645 para el 95&nbsp;%. Con 4 al día, desviación 2 y 10 días de plazo: 40 + 11 = 51.</p>
+          </div>
+          <div>
+            <h3>Los que se venden de vez en cuando</h3>
+            <p>Aquí el promedio engaña: un producto que sale una vez por semana no se vende un poquito cada día. Se repite la historia: se toman al azar tantos días del historial como dura la espera y se suman. Eso se hace 5.000 veces, y el punto de pedido es la cifra que alcanzó en el nivel de servicio de esas esperas: con 95&nbsp;%, en 95 de cada 100.</p>
+          </div>
+          <div>
+            <h3>El nivel de servicio, si prefiere sacarlo de los costos</h3>
+            <p>Conviene tener producto mientras guardar una unidad durante un lote cueste menos que el margen que se pierde si falta.</p>
+            <span class="formula">nivel = 1 − (guardar una unidad durante un lote ÷ margen por unidad)</span>
+            <p>Con margen de 1,00 y guardar un mes a 0,05: 1 − 0,05 ÷ 1,00 = 95&nbsp;%.</p>
+          </div>
+          <div>
+            <h3>Cuándo y cuánto pedir</h3>
+            <p>Se pide cuando las existencias, más lo que viene en camino, no pasan del punto de pedido. Se pide un lote, que por defecto es un mes de venta, más lo que falte para volver al punto.</p>
+          </div>
+          <div>
+            <h3>Lo que hay detrás de cada cifra</h3>
+            <p>Toque un producto de la tabla: verá su venta de cada día y las 5.000 esperas repetidas, con la raya del punto de pedido y cuántas de esas esperas cubre.</p>
+          </div>
+        </div>
+
+        <div class="limites">
+          <h3>Lo que esta cuenta no ve</h3>
+          <ul>
+            <li>Supone que la venta de los próximos meses se parece a la del historial: no ve temporadas, promociones, productos nuevos ni cambios de precio.</li>
+            <li>Con menos de 60 días de historia, la cuenta es poco confiable.</li>
+            <li>Un producto que entró a la venta a mitad del periodo se cuenta como si no se hubiera vendido antes.</li>
+            <li>No sabe de vencimientos, pedidos mínimos del proveedor ni espacio en bodega: ajuste la cifra con lo que usted sabe.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <div class="contenedor pie-cuerpo">
+      <p class="firma-pie">
+        <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+          <g fill="none" stroke="#EFE9DC" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 41 H36"/>
+            <path d="M9 58 L36 8"/>
+            <path d="M36 8 V58"/>
+            <path d="M36 8 H45 A11 11 0 0 1 45 30 H36"/>
+            <path d="M36 30 H47 A14 14 0 0 1 47 58 H36"/>
+          </g>
+          <circle cx="46" cy="19" r="5" fill="#F07A3B"/>
+        </svg>
+        <span>Hecho por Andrés Briñez · <a href="https://andresbrinez.com">andresbrinez.com</a></span>
+      </p>
+      <p><a href="https://github.com/ACBRI/cuanto-pedir">Código abierto</a> con licencia MIT</p>
+    </div>
+  </footer>
+
+  <script src="calculo.js"></script>
+  <script src="ejemplo.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
