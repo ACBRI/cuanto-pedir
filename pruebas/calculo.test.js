@@ -472,6 +472,31 @@ describe('historial', () => {
   });
 });
 
+describe('existencias y plazos juntos', () => {
+  test('el plazo manda desde su archivo; lo que solo está en plazos no entra al catálogo', () => {
+    const existencias = new Map([['A', { codigo: 'A', existencias: 10, plazo: 5 }], ['B', { codigo: 'B', existencias: 3 }]]);
+    const plazos = new Map([['A', { codigo: 'A', plazo: 20 }], ['Z', { codigo: 'Z', nombre: 'Solo en plazos', plazo: 9 }]]);
+    const info = C.unirPorProducto(existencias, plazos);
+    assert.equal(info.get('A').plazo, 20);
+    assert.equal(info.get('A').existencias, 10);
+    assert.equal(info.get('B').plazo, undefined);
+    assert.equal(info.get('Z').soloPlazo, true);
+
+    const { filas } = C.leerCSV('fecha,producto,cantidad\n2026-04-01,A,3\n2026-04-02,A,4\n');
+    const e = C.leerEstructura(filas, 'historial');
+    const historial = C.prepararHistorial(filas, e.desde, e.columnas);
+    const { resultados } = C.calcularTodo({ historial, info, parametros: { plazo: 10, modoNivel: 'fijo', nivel: 0.95, diasLote: 30 } });
+    assert.deepEqual(resultados.map((r) => r.clave).sort(), ['A', 'B']);
+  });
+
+  test('varias filas del mismo producto en existencias se suman', () => {
+    const { filas } = C.leerCSV('producto;bodega;existencias\nA;Quito;10\nA;Guayaquil;5,5\n');
+    const e = C.leerEstructura(filas, 'existencias');
+    const r = C.leerPorProducto(filas, e.desde, e.columnas, { delimitador: ';' });
+    assert.equal(r.porClave.get('A').existencias, 15.5);
+  });
+});
+
 describe('claves de producto', () => {
   test('cruza códigos escritos distinto', () => {
     assert.equal(C.claveProducto('[PT-001] Paracetamol'), 'PT-001');

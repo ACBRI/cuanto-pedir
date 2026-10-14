@@ -769,6 +769,29 @@
     return { porClave, decimal, cuenta };
   }
 
+  /**
+   * Junta lo que se sabe de cada producto: el archivo de existencias trae
+   * existencias, lo que viene en camino, costo y precio; el de plazos manda en
+   * el plazo. Un producto que solo está en el de plazos no se agrega al
+   * catálogo (queda marcado como `soloPlazo`).
+   */
+  function unirPorProducto(existencias, plazos) {
+    const info = new Map();
+    if (existencias) for (const [clave, datos] of existencias) info.set(clave, Object.assign({}, datos));
+    if (plazos) {
+      for (const [clave, datos] of plazos) {
+        const previo = info.get(clave);
+        if (previo) {
+          if (datos.plazo > 0) previo.plazo = datos.plazo;
+          if (!previo.nombre && datos.nombre) previo.nombre = datos.nombre;
+        } else {
+          info.set(clave, { codigo: datos.codigo, nombre: datos.nombre, plazo: datos.plazo, soloPlazo: true });
+        }
+      }
+    }
+    return info;
+  }
+
   // ----------------------------------------------------- la venta de cada día
 
   /**
@@ -1084,7 +1107,7 @@
     const vistos = new Set(universo.map((u) => u.clave));
     if (info) {
       for (const [clave, datos] of info) {
-        if (vistos.has(clave)) continue;
+        if (vistos.has(clave) || datos.soloPlazo) continue;
         vistos.add(clave);
         universo.push({ clave, codigo: datos.codigo, nombre: datos.nombre || '', indice: -1, enHistorial: false });
       }
@@ -1299,7 +1322,7 @@
     diaDeFecha, fechaDeDia, diaSemana, fechaISO, fechaCorta, fechaSinAnio, nombreDia, leerFecha, detectarOrdenFecha,
     detectarDelimitador, leerCSV,
     detectarColumnas, encontrarEncabezado, completarPorContenido, leerEstructura,
-    prepararHistorial, leerPorProducto, construirSeries,
+    prepararHistorial, leerPorProducto, unirPorProducto, construirSeries,
     media, desviacion, inversaNormal, generador, semillaDe, remuestrear, percentilAlto, clasificar,
     cuentaRegular, cuentaEsporadica, guardarDuranteUnLote, nivelPorCostos, acotarNivel,
     calcularProducto, decidirPedido, prepararCalculo, calcularIndice, resumir, calcularTodo,
