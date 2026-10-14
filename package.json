@@ -1,0 +1,21 @@
+{
+  "name": "cuanto-pedir",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Calculadora gratuita: qué productos pedir, cuánto y cuándo, a partir del historial de ventas o de consumo. Todo se calcula en el navegador.",
+  "license": "MIT",
+  "author": "Andrés Briñez (https://andresbrinez.com)",
+  "homepage": "https://acbri.github.io/cuanto-pedir/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ACBRI/cuanto-pedir.git"
+  },
+  "scripts": {
+    "test": "node --test",
+    "ejemplo": "node herramientas/escribir-ejemplo.js",
+    "punta": "node pruebas/punta-a-punta.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "1.61.1"
+  }
+}
