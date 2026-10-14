@@ -1,0 +1,27 @@
+name: Pruebas
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Dependencias
+        run: npm ci
+      - name: Pruebas del cálculo
+        run: npm test
+      - name: Navegador para la prueba completa
+        run: npx playwright-core install --with-deps --only-shell chromium
+      - name: Prueba completa en Chromium
+        run: npm run punta
